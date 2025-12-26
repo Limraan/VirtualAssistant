@@ -18,10 +18,13 @@ const useGetCreatorCourseData = () => {
         );
         dispatch(setCreatorCourseData(result.data));
       } catch (error) {
-        console.log(error);
-        toast.error(
-          error.response?.data?.message || "Failed to load creator courses"
-        );
+        // 401 is expected when user is not logged in or token expired
+        if (error.response?.status !== 401) {
+          console.log(error);
+          toast.error(
+            error.response?.data?.message || "Failed to load creator courses"
+          );
+        }
       }
     };
 

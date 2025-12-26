@@ -4,8 +4,13 @@ import Course from "../models/courseModel.js";
 export const addReview = async (req, res) => {
   try {
     
-    const { rating, comment ,courseId} = req.body;
+    const { rating, comment, courseId} = req.body;
     const userId = req.userId; 
+    
+    if(!rating || rating < 1 || rating > 5){
+        return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+    
     // Check if course exists
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: "Course not found" });

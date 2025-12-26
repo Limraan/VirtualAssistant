@@ -14,6 +14,9 @@ export const createOrder = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: "Course not found" });
+    if (!course.price || course.price <= 0) {
+      return res.status(400).json({ message: "Invalid course price" });
+    }
 
     const options = {
       amount: course.price * 100, // in paisa
@@ -34,19 +37,31 @@ export const createOrder = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
   try {
-    
         const {razorpay_order_id , courseId , userId} = req.body
+        if(!razorpay_order_id || !courseId || !userId){
+            return res.status(400).json({ message: "Missing required fields" });
+        }
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
         if(orderInfo.status === 'paid') {
       // Update user and course enrollment
       const user = await User.findById(userId);
-      if (!user.enrolledCourses.includes(courseId)) {
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      // Convert to string for comparison
+      const courseIdStr = courseId.toString()
+      const userIdStr = userId.toString()
+      
+      if (!user.enrolledCourses.some(id => id.toString() === courseIdStr)) {
         user.enrolledCourses.push(courseId);
         await user.save();
       }
 
       const course = await Course.findById(courseId).populate("lectures");
-      if (!course.enrolledStudents.includes(userId)) {
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      if (!course.enrolledStudents.some(id => id.toString() === userIdStr)) {
         course.enrolledStudents.push(userId);
         await course.save();
       }

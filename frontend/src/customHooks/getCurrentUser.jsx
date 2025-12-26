@@ -16,7 +16,10 @@ const useGetCurrentUser = () => {
         );
         dispatch(setUserData(result.data));
       } catch (error) {
-        console.log(error);
+        // 401 is expected when user is not logged in, don't log it
+        if (error.response?.status !== 401) {
+          console.log(error);
+        }
         dispatch(setUserData(null));
       }
     };

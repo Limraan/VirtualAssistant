@@ -38,6 +38,10 @@ Query: ${input}
   const result = await model.generateContent(prompt);
   const response = await result.response;
   const keyword = response.text().trim()
+  
+  if(!keyword){
+      return res.status(200).json([]);
+  }
 
 
 

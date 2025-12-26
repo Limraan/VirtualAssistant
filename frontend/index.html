@@ -5,6 +5,48 @@
     <link rel="icon" type="image/svg+xml" href="/logo.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Virtual Courses</title>
+    <script>
+      // Suppress console warnings early (before React loads)
+      (function() {
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        const originalLog = console.log;
+        
+        const shouldSuppress = (message) => {
+          if (!message) return false;
+          const msg = String(message).toLowerCase();
+          return (
+            msg.includes('cross-origin-opener-policy') ||
+            msg.includes('window.closed') ||
+            msg.includes('window.close') ||
+            msg.includes('react devtools') ||
+            msg.includes('download the react devtools') ||
+            msg.includes('understand this error')
+          );
+        };
+        
+        console.warn = function(...args) {
+          const message = args[0];
+          if (!shouldSuppress(message)) {
+            originalWarn.apply(console, args);
+          }
+        };
+        
+        console.error = function(...args) {
+          const message = args[0];
+          if (!shouldSuppress(message)) {
+            originalError.apply(console, args);
+          }
+        };
+        
+        console.log = function(...args) {
+          const message = args[0];
+          if (!shouldSuppress(message)) {
+            originalLog.apply(console, args);
+          }
+        };
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

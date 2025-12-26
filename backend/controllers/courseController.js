@@ -27,11 +27,6 @@ export const createCourse = async (req,res) => {
 export const getPublishedCourses = async (req,res) => {
     try {
         const courses = await Course.find({isPublished:true}).populate("lectures reviews")
-        if(!courses)
-        {
-            return res.status(404).json({message:"Course not found"})
-        }
-
         return res.status(200).json(courses)
         
     } catch (error) {
@@ -44,10 +39,6 @@ export const getCreatorCourses = async (req,res) => {
     try {
         const userId = req.userId
         const courses = await Course.find({creator:userId})
-        if(!courses)
-        {
-            return res.status(404).json({message:"Course not found"})
-        }
         return res.status(200).json(courses)
         
     } catch (error) {
@@ -59,7 +50,16 @@ export const editCourse = async (req,res) => {
     try {
         const {courseId} = req.params;
         const {title , subTitle , description , category , level , price , isPublished } = req.body;
-        const updateData = {title , subTitle , description , category , level , price , isPublished}
+        const updateData = {}
+        
+        // Only include fields that are provided
+        if(title !== undefined) updateData.title = title
+        if(subTitle !== undefined) updateData.subTitle = subTitle
+        if(description !== undefined) updateData.description = description
+        if(category !== undefined) updateData.category = category
+        if(level !== undefined) updateData.level = level
+        if(price !== undefined) updateData.price = price
+        if(isPublished !== undefined) updateData.isPublished = isPublished
         
          if(req.file){
             const thumbnail = await uploadOnCloudinary(req.file.path)
@@ -125,12 +125,12 @@ export const createLecture = async (req,res) => {
         }
         const lecture = await Lecture.create({lectureTitle})
         const course = await Course.findById(courseId)
-        if(course){
-            course.lectures.push(lecture._id)
-            
+        if(!course){
+            return res.status(404).json({message:"Course not found"})
         }
-        await course.populate("lectures")
+        course.lectures.push(lecture._id)
         await course.save()
+        await course.populate("lectures")
         return res.status(201).json({lecture,course})
         
     } catch (error) {
@@ -147,7 +147,6 @@ export const getCourseLecture = async (req,res) => {
             return res.status(404).json({message:"Course not found"})
         }
         await course.populate("lectures")
-        await course.save()
         return res.status(200).json(course)
     } catch (error) {
         return res.status(500).json({message:`Failed to get Lectures ${error}`})
@@ -162,15 +161,18 @@ export const editLecture = async (req,res) => {
           if(!lecture){
             return res.status(404).json({message:"Lecture not found"})
         }
-        let videoUrl
         if(req.file){
-            videoUrl =await uploadOnCloudinary(req.file.path)
-            lecture.videoUrl = videoUrl
-                }
+            const videoUrl = await uploadOnCloudinary(req.file.path)
+            if(videoUrl){
+                lecture.videoUrl = videoUrl
+            }
+        }
         if(lectureTitle){
             lecture.lectureTitle = lectureTitle
         }
-        lecture.isPreviewFree = isPreviewFree
+        if(isPreviewFree !== undefined){
+            lecture.isPreviewFree = isPreviewFree
+        }
         
          await lecture.save()
         return res.status(200).json(lecture)

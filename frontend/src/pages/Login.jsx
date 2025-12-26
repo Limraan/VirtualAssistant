@@ -43,7 +43,7 @@ function Login() {
                 let user = response.user
                 let name = user.displayName;
                 let email=user.email
-                let role=""
+                let role="student" // Default to student for login
                 
                 
                 const result = await axios.post(serverUrl + "/api/auth/googlesignup" , {name , email , role}
@@ -53,8 +53,23 @@ function Login() {
                 navigate("/")
                 toast.success("Login Successfully")
             } catch (error) {
-                console.log(error)
-                toast.error(error.response.data.message)
+                // Handle Firebase popup cancellation or errors
+                if (error.code === 'auth/popup-closed-by-user' || 
+                    error.code === 'auth/cancelled-popup-request' ||
+                    error.code === 'auth/popup-blocked') {
+                    // User closed the popup or it was blocked, don't show error
+                    return;
+                }
+                // Suppress COOP-related errors (they're browser warnings, not real errors)
+                if (error.message?.includes('Cross-Origin-Opener-Policy')) {
+                    return;
+                }
+                // Only log and show error for actual failures
+                if (error.response?.data?.message) {
+                    toast.error(error.response.data.message)
+                } else if (error.message && !error.message.includes('Cross-Origin')) {
+                    toast.error(error.message)
+                }
             }
             
         }

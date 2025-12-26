@@ -19,8 +19,8 @@ export const signUp=async (req,res)=>{
         if(!validator.isEmail(email)){
             return res.status(400).json({message:"Please enter valid Email"})
         }
-        if(password.length < 8){
-            return res.status(400).json({message:"Please enter a Strong Password"})
+        if(!password || password.length < 8){
+            return res.status(400).json({message:"Please enter a strong password (minimum 8 characters)"})
         }
         
         let hashPassword = await bcrypt.hash(password,10)
@@ -32,6 +32,9 @@ export const signUp=async (req,res)=>{
            
             })
         let token = await genToken(user._id)
+        if(!token){
+            return res.status(500).json({message:"Failed to generate token"})
+        }
         res.cookie("token",token,{
             httpOnly:true,
             secure:false,
@@ -53,11 +56,17 @@ export const login=async(req,res)=>{
         if(!user){
             return res.status(400).json({message:"user does not exist"})
         }
+        if(!user.password){
+            return res.status(400).json({message:"Please login with Google or reset your password"})
+        }
         let isMatch =await bcrypt.compare(password, user.password)
         if(!isMatch){
             return res.status(400).json({message:"incorrect Password"})
         }
         let token =await genToken(user._id)
+        if(!token){
+            return res.status(500).json({message:"Failed to generate token"})
+        }
         res.cookie("token",token,{
             httpOnly:true,
             secure:false,
@@ -88,13 +97,27 @@ export const logOut = async(req,res)=>{
 export const googleSignup = async (req,res) => {
     try {
         const {name , email , role} = req.body
+        
+        // Validate role if provided
+        if(role && role !== "educator" && role !== "student"){
+            return res.status(400).json({message:"Invalid role. Must be 'student' or 'educator'"})
+        }
+        
         let user= await User.findOne({email})
         if(!user){
+            // Create new user with role (default to student if not provided)
+            const userRole = role || "student"
             user = await User.create({
-            name , email ,role
-        })
+                name , 
+                email ,
+                role: userRole
+            })
         }
+        // If user exists, just return them (don't update role)
         let token =await genToken(user._id)
+        if(!token){
+            return res.status(500).json({message:"Failed to generate token"})
+        }
         res.cookie("token",token,{
             httpOnly:true,
             secure:false,
@@ -120,13 +143,13 @@ export const sendOtp = async (req,res) => {
         }
         const otp = Math.floor(1000 + Math.random() * 9000).toString()
 
-        user.resetOtp=otp,
-        user.otpExpires=Date.now() + 5*60*1000,
-        user.isOtpVerifed= false 
+        user.resetOtp = otp
+        user.otpExpires = Date.now() + 5*60*1000
+        user.isOtpVerifed = false 
 
         await user.save()
         await sendMail(email,otp)
-        return res.status(200).json({message:"Email Successfully send"})
+        return res.status(200).json({message:"Email successfully sent"})
     } catch (error) {
 
         return res.status(500).json({message:`send otp error ${error}`})
@@ -145,11 +168,11 @@ export const verifyOtp = async (req,res) => {
         user.resetOtp=undefined
         user.otpExpires=undefined
         await user.save()
-        return res.status(200).json({message:"OTP varified "})
+        return res.status(200).json({message:"OTP verified"})
 
 
     } catch (error) {
-         return res.status(500).json({message:`Varify otp error ${error}`})
+         return res.status(500).json({message:`Verify OTP error ${error}`})
     }
 }
 
@@ -158,7 +181,10 @@ export const resetPassword = async (req,res) => {
         const {email ,password } =  req.body
          const user = await User.findOne({email})
         if(!user || !user.isOtpVerifed ){
-            return res.status(404).json({message:"OTP verfication required"})
+            return res.status(404).json({message:"OTP verification required"})
+        }
+        if(!password || password.length < 8){
+            return res.status(400).json({message:"Please enter a strong password (minimum 8 characters)"})
         }
 
         const hashPassword = await bcrypt.hash(password,10)
