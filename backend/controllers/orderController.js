@@ -18,7 +18,7 @@ export const createOrder = async (req, res) => {
     const options = {
       amount: course.price * 100, // in paisa
       currency: 'INR',
-      receipt: `${courseId}.toString()`,
+      receipt: courseId.toString(),
     };
 
     const order = await razorpayInstance.orders.create(options);

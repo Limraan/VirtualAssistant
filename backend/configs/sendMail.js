@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 
 const sendMail=async (to,otp) => {
-    transporter.sendMail({
+    await transporter.sendMail({
         from:process.env.EMAIL,
         to:to,
         subject:"Reset Your Password",
