@@ -38,7 +38,7 @@ export const getPublishedCourses = async (req,res) => {
 export const getCreatorCourses = async (req,res) => {
     try {
         const userId = req.userId
-        const courses = await Course.find({creator:userId})
+        const courses = await Course.find({creator:userId}).populate('lectures').populate('enrolledStudents', 'name email')
         return res.status(200).json(courses)
         
     } catch (error) {
@@ -57,14 +57,23 @@ export const editCourse = async (req,res) => {
         if(subTitle !== undefined) updateData.subTitle = subTitle
         if(description !== undefined) updateData.description = description
         if(category !== undefined) updateData.category = category
-        if(level !== undefined) updateData.level = level
+        // Convert empty string to undefined for level (enum doesn't accept empty strings)
+        if(level !== undefined) {
+            updateData.level = level === '' ? undefined : level
+        }
         if(price !== undefined) updateData.price = price
         if(isPublished !== undefined) updateData.isPublished = isPublished
         
          if(req.file){
-            const thumbnail = await uploadOnCloudinary(req.file.path)
-            if(thumbnail){
-                updateData.thumbnail = thumbnail
+            try {
+                const thumbnail = await uploadOnCloudinary(req.file.path)
+                if(thumbnail){
+                    updateData.thumbnail = thumbnail
+                } else {
+                    return res.status(500).json({message:"Failed to upload thumbnail. Please check your Cloudinary configuration."})
+                }
+            } catch (uploadError) {
+                return res.status(500).json({message:uploadError.message || "Failed to upload thumbnail. Please check your Cloudinary configuration in .env file."})
             }
         }
         
@@ -76,7 +85,7 @@ export const editCourse = async (req,res) => {
         course = await Course.findByIdAndUpdate(courseId , updateData , {new:true})
         return res.status(201).json(course)
     } catch (error) {
-        return res.status(500).json({message:`Failed to update course ${error}`})
+        return res.status(500).json({message:`Failed to update course: ${error.message || error}`})
     }
 }
 

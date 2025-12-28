@@ -17,7 +17,14 @@ const courseSchema = new mongoose.Schema({
     },
     level:{
         type:String,
-        enum:['Beginner','Intermediate','Advanced']
+        enum: {
+            values: ['Beginner','Intermediate','Advanced'],
+            message: 'Level must be Beginner, Intermediate, or Advanced'
+        },
+        // Convert empty strings to undefined
+        set: function(value) {
+            return value === '' ? undefined : value;
+        }
     },
     price:{
         type:Number
@@ -46,6 +53,22 @@ const courseSchema = new mongoose.Schema({
         ref: 'Review'
         }],
 },{timestamps:true})
+
+// Pre-save hook to convert empty strings to undefined for enum fields
+courseSchema.pre('save', function(next) {
+    if (this.level === '') {
+        this.level = undefined;
+    }
+    next();
+});
+
+// Pre-validate hook as additional safety
+courseSchema.pre('validate', function(next) {
+    if (this.level === '') {
+        this.level = undefined;
+    }
+    next();
+});
 
 const Course = mongoose.model("Course",courseSchema)
 
