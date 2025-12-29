@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaArrowLeft } from "react-icons/fa"
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -13,10 +13,19 @@ function EditLecture() {
     const {courseId , lectureId} = useParams()
     const {lectureData} = useSelector(state=>state.lecture)
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const selectedLecture = lectureData.find(lecture => lecture._id === lectureId)
     const [videoUrl,setVideoUrl] = useState(null)
-    const [lectureTitle,setLectureTitle] = useState(selectedLecture.lectureTitle)
-    const [isPreviewFree,setIsPreviewFree] = useState(false)
+    const [lectureTitle,setLectureTitle] = useState(selectedLecture?.lectureTitle || "")
+    const [isPreviewFree,setIsPreviewFree] = useState(selectedLecture?.isPreviewFree || false)
+    
+    // Redirect if lecture not found
+    useEffect(() => {
+      if (!selectedLecture && lectureData.length > 0) {
+        toast.error("Lecture not found")
+        navigate(`/createlecture/${courseId}`)
+      }
+    }, [selectedLecture, lectureData, courseId, navigate])
 
     const formData = new FormData()
     formData.append("lectureTitle",lectureTitle)
@@ -29,13 +38,17 @@ function EditLecture() {
       try {
         const result = await axios.post(serverUrl + `/api/course/editlecture/${lectureId}` , formData , {withCredentials:true})
         console.log(result.data)
-        dispatch(setLectureData([...lectureData,result.data]))
+        // Update the lecture in the list
+        const updatedLectures = lectureData.map(lecture => 
+          lecture._id === lectureId ? result.data : lecture
+        )
+        dispatch(setLectureData(updatedLectures))
         toast.success("Lecture Updated")
-        navigate("/courses")
+        navigate(`/createlecture/${courseId}`)
         setLoading(false)
       } catch (error) {
         console.log(error)
-        toast.error(error.response.data.message)
+        toast.error(error.response?.data?.message || "Failed to update lecture")
         setLoading(false)
       }
     }
@@ -61,11 +74,6 @@ function EditLecture() {
 
 
 
-   
-
-    
-
-    const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-6 space-y-6">
@@ -91,7 +99,7 @@ function EditLecture() {
             <input
               type="text"
               className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[black]focus:outline-none"
-              placeholder={selectedLecture.lectureTitle}
+              placeholder={selectedLecture?.lectureTitle || "Enter lecture title"}
               onChange={(e)=>setLectureTitle(e.target.value)}
               value={lectureTitle}
             />

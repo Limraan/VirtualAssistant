@@ -23,6 +23,7 @@ function Nav() {
       console.log(result.data)
      await dispatch(setUserData(null))
       toast.success("LogOut Successfully")
+      navigate("/login")
     } catch (error) {
       console.log(error.response.data.message)
     }

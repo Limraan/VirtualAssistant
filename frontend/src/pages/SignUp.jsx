@@ -24,6 +24,10 @@ function SignUp() {
     let dispatch = useDispatch()
 
     const handleSignUp = async () => {
+        if (!name.trim() || !email.trim() || !password.trim()) {
+            toast.error("Please fill in all fields");
+            return;
+        }
         setLoading(true)
         try {
             const result = await axios.post(serverUrl + "/api/auth/signup" , {name , email , password , role} , {withCredentials:true} )

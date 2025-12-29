@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import Card from "../components/Card.jsx";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Nav from '../components/Nav';
 import ai from '../assets/SearchAi.png'
 import { useSelector } from 'react-redux';
 function AllCourses() {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const navigate = useNavigate()
+  const location = useLocation()
  const [category,setCategory] = useState([])
  const [filterCourses,setFilterCourses] = useState([])
   const {courseData} = useSelector(state=>state.course)
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const cat = params.get('category');
+    if (cat) {
+      setCategory([cat]);
+    }
+  }, [location.search]);
  
   
   const toggleCategory = (e) =>{
@@ -103,12 +111,17 @@ setFilterCourses(courseData)
 
       {/* Main Courses Section */}
       <main className="w-full transition-all duration-300 py-[130px] md:pl-[300px]  flex items-start justify-center md:justify-start flex-wrap gap-6 px-[10px]">
-        {
-        filterCourses?.map((item,index)=>(
-          <Card key={index} thumbnail={item.thumbnail} title={item.title} price={item.price} category={item.category} id={item._id} reviews={item.reviews} />
-
-        ))
-      }
+        {filterCourses.length === 0 ? (
+          <div className="w-full text-center py-10">
+            <p className="text-xl text-gray-600">No courses found in this category.</p>
+            <p className="text-lg text-gray-500 mt-2">Try exploring other categories or check back later.</p>
+            <button className="mt-4 px-4 py-2 bg-black text-white rounded" onClick={() => navigate("/")}>Explore Home</button>
+          </div>
+        ) : (
+          filterCourses?.map((item,index)=>(
+            <Card key={index} thumbnail={item.thumbnail} title={item.title} price={item.price} category={item.category} id={item._id} reviews={item.reviews} />
+          ))
+        )}
       </main>
     </div>
   );

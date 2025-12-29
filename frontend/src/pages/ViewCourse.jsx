@@ -7,6 +7,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import img from "../assets/empty.jpg"
 import Card from "../components/Card.jsx"
 import { setSelectedCourseData } from '../redux/courseSlice';
+import { setUserData } from '../redux/userSlice';
 import { FaLock, FaPlayCircle } from "react-icons/fa";
 import { toast } from 'react-toastify';
 import { FaStar } from "react-icons/fa6";
@@ -61,17 +62,23 @@ console.log("Average Rating:", avgRating);
   
 
   const fetchCourseData = async () => {
+    let found = false;
     courseData.map((item) => {
       if (item._id === courseId) {
-      dispatch(setSelectedCourseData(item))
+        dispatch(setSelectedCourseData(item))
         console.log(selectedCourseData)
-      
-
+        found = true;
         return null;
       }
-
     })
-
+    if (!found) {
+      try {
+        const result = await axios.get(serverUrl + `/api/course/getcourse/${courseId}`, { withCredentials: true });
+        dispatch(setSelectedCourseData(result.data));
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
     const checkEnrollment = () => {
   const verify = userData?.enrolledCourses?.some(c => {
@@ -130,6 +137,26 @@ console.log("Average Rating:", avgRating);
 
  
 const handleEnroll = async (courseId, userId) => {
+  // Check if already enrolled before proceeding
+  if (isEnrolled) {
+    toast.info("You are already enrolled in this course!");
+    navigate(`/viewlecture/${courseId}`);
+    return;
+  }
+
+  // Double check enrollment status
+  const alreadyEnrolled = userData?.enrolledCourses?.some(c => {
+    const enrolledId = typeof c === 'string' ? c : c._id;
+    return enrolledId?.toString() === courseId?.toString();
+  });
+
+  if (alreadyEnrolled) {
+    toast.info("You are already enrolled in this course!");
+    setIsEnrolled(true);
+    navigate(`/viewlecture/${courseId}`);
+    return;
+  }
+
   try {
     // 1. Create Order
     const orderData = await axios.post(serverUrl + "/api/payment/create-order", {
@@ -154,7 +181,17 @@ const handleEnroll = async (courseId, userId) => {
   userId
 }, { withCredentials: true });
     
-setIsEnrolled(true)
+    // Update enrollment status
+    setIsEnrolled(true);
+    
+    // Refresh user data to get updated enrolled courses
+    try {
+      const userRes = await axios.get(serverUrl + "/api/user/currentuser", { withCredentials: true });
+      dispatch(setUserData(userRes.data));
+    } catch (userError) {
+      console.log("Error refreshing user data:", userError);
+    }
+    
     toast.success(verifyRes.data.message);
   } catch (verifyError) {
     toast.error("Payment verification failed.");

@@ -21,35 +21,35 @@ function ExploreCourses() {
 
         </div>
         <div className='w-[720px] max-w-[90%] lg:h-[300px] md:min-h-[300px] flex items-center justify-center lg:gap-[60px] gap-[50px] flex-wrap mb-[50px] lg:mb-[0px]'>
-          <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center '>
+          <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=Web Development")}>
             <div className='w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center '><TbDeviceDesktopAnalytics className='w-[60px] h-[60px] text-[#6d6c6c]' /></div>
             Web Devlopment
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center '>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=UI UX Designing")}>
             <div className='w-[100px] h-[90px] bg-[#d9fbe0] rounded-lg flex items-center justify-center '><LiaUikit className='w-[60px] h-[60px] text-[#6d6c6c]' /></div>
             UI UX Designing
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center'>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=App Development")}>
             <div className='w-[100px] h-[90px] bg-[#fcb9c8] rounded-lg flex items-center justify-center '><MdAppShortcut className='w-[50px] h-[50px] text-[#6d6c6c]' /></div>
             App Devlopment
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center'>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=Ethical Hacking")}>
             <div className='w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center '><FaHackerrank className='w-[55px] h-[55px] text-[#6d6c6c]' /></div>
             Ethical Hacking
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center'>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=AI/ML")}>
             <div className='w-[100px] h-[90px] bg-[#d9fbe0] rounded-lg flex items-center justify-center '><TbBrandOpenai className='w-[55px] h-[55px] text-[#6d6c6c]' /></div>
             AI/ML
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center'>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=Data Science")}>
             <div className='w-[100px] h-[90px] bg-[#fcb9c8] rounded-lg flex items-center justify-center '><SiGoogledataproc className='w-[45px] h-[45px] text-[#6d6c6c]' /></div>
             Data Science
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center '>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=Data Analytics")}>
             <div className='w-[100px] h-[90px] bg-[#fbd9fb] rounded-lg flex items-center justify-center '><BsClipboardDataFill className='w-[50px] h-[50px] text-[#6d6c6c]' /></div>
             Data Analytics
             </div>
-            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center'>
+            <div className='w-[100px] h-[130px] font-light text-[13px] flex flex-col gap-3 text-center cursor-pointer' onClick={() => navigate("/allcourses?category=AI Tools")}>
             <div className='w-[100px] h-[90px] bg-[#d9fbe0] rounded-lg flex items-center justify-center '><SiOpenaigym className='w-[50px] h-[50px] text-[#6d6c6c]' /></div>
             AI Tools
             </div>

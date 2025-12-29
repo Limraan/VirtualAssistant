@@ -8,7 +8,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { ClipLoader } from 'react-spinners';
-import { setCourseData } from '../../redux/courseSlice';
+import { setCourseData, setCreatorCourseData } from '../../redux/courseSlice';
 function AddCourses() {
     const navigate= useNavigate()
     const {courseId} = useParams()
@@ -27,7 +27,7 @@ function AddCourses() {
    const [backendImage,setBackendImage] = useState(null)
    let [loading,setLoading] = useState(false)
    const dispatch = useDispatch()
-   const {courseData} = useSelector(state=>state.course)
+   const {courseData, creatorCourseData} = useSelector(state=>state.course)
 
 
 
@@ -77,7 +77,10 @@ const editCourseHandler = async () => {
   formData.append("category", category);
   formData.append("level", level);
   formData.append("price", price);
-  formData.append("thumbnail", backendImage);
+  // Only append thumbnail if a new image was selected
+  if (backendImage) {
+    formData.append("thumbnail", backendImage);
+  }
   formData.append("isPublished", isPublished);
 
   try {
@@ -101,6 +104,12 @@ const editCourseHandler = async () => {
       dispatch(setCourseData(filteredCourses));
     }
 
+    // Update creatorCourseData
+    const updatedCreatorCourses = creatorCourseData.map(c =>
+      c._id === courseId ? updatedCourse : c
+    );
+    dispatch(setCreatorCourseData(updatedCreatorCourses));
+
     navigate("/courses");
     toast.success("Course Updated");
   } catch (error) {
@@ -119,6 +128,8 @@ const editCourseHandler = async () => {
       toast.success("Course Deleted")
        const filteredCourses = courseData.filter(c => c._id !== courseId);
       dispatch(setCourseData(filteredCourses));
+      const filteredCreatorCourses = creatorCourseData.filter(c => c._id !== courseId);
+      dispatch(setCreatorCourseData(filteredCreatorCourses));
       console.log(result)
       navigate("/courses")
       setLoading(false)
