@@ -249,7 +249,6 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👥 Authors
 
 - **Suchithra MK** - [@SuchithraMK](https://github.com/SuchithraMK)
-- **Chandrashekhara K M** - [@ChandrashekharaKM](https://github.com/ChandrashekharaKM)
 
 ## 🙏 Acknowledgments
 
